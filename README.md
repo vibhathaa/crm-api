@@ -21,3 +21,4 @@ The project structure is as follows
 - config.py - Config file 
 
 ## TODO ##
+- Add support for OPTIONS verb pre-flight CORS check done by browser

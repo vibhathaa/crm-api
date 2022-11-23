@@ -19,17 +19,17 @@ def get_customer_by_id(customerId):
         return jsonify({ 'results' : [ data ] }), 200  
         
 def get_customer_by_filter(**kwargs):  
-
+    
     filter = dict()
     fieldList = ['name', 'id', 'contact', 'createdTimestamp']
 
-    for field in fieldList:
-        if field not in kwargs.keys():
-            filter[field] = f"%"
-        else:
-            filter[field] = f"%{kwargs[field]}%"
+    for key in kwargs:
+        if kwargs[key] != '' or fieldList.get(key) != None:
+            filter[key] = kwargs[key]
     
-    print(filter)
+    if len(filter) == 0:
+        abort(200, f"Filter not supported")    
+
     customers = CustomerRepository.get_by_filter(filter)
     data = customers_schema.dump(customers)
     

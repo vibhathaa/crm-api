@@ -5,6 +5,9 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
+'''
+change app.config["SQLALCHEMY_DATABASE_URI"] to suport different db backends.
+'''
 
 basedir = pathlib.Path(__file__).parent.resolve()
 connexion_app = connexion.App(__name__, specification_dir=basedir)

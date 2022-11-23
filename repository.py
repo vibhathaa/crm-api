@@ -1,5 +1,6 @@
+import re
 from config import db
-from sqlalchemy import update
+from sqlalchemy import update,text,bindparam
 from models import Customer,Opportunity, customer_schema, opportunity_schema
 
 
@@ -13,14 +14,30 @@ class CustomerRepository:
         customer = db.session.get(Customer,id)
         return customer
     
-    def get_by_filter(filter):
+    def get_by_filter(filter):       
+       
+        s = ""
+        params = []
+        #escape special charcters
+        last_key = list(filter.keys()).pop()
+        print(filter)
+        #construct the WHERE clause and wrap search parameters
+        for key in filter:
+            value = re.sub('[*_\[\\]^]','',filter[key])
+            print("value", value)
+            params.append(bindparam(key, value=f"%{value}%"))
+            if key != last_key:
+                s += f"{key} LIKE :{key} AND "                
+            else:
+                s += f"{key} LIKE :{key};"
         
-        customers = db.session.query(Customer).filter(Customer.name.like(f"{filter['name']}"),
-                                        Customer.id.like(f"{filter['id']}"),
-                                        Customer.contact.like(
-                                            f"{filter['contact']}"),
-                                        Customer.createdTimestamp.like(f"{filter['createdTimestamp']}")).all()
 
+        query = text(s)
+        p_tuple = tuple(params)
+        query = query.bindparams(*p_tuple)       
+
+        customers = db.session().query(Customer).filter(query).all()      
+        
         return customers
 
     def update_status_by_id(id,new_status):

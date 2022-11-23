@@ -1,0 +1,218 @@
+openapi: "3.0.0"
+
+info:
+  title: CRM API
+  version: "1.0"
+servers:
+  - url: http://localhost:8000/
+paths:
+  /customers/:
+    get:
+      summary: Get all customers
+      description: Returns all the customers
+      operationId: customers.get_all_customers
+      responses:
+        204:
+          description: return all customers          
+    put:
+      summary: Change the status attribute of the customer
+      description: Change the status of the customer
+      operationId: customers.change_customer_status
+      parameters:
+        - name: customerId 
+          in: query
+          required: true
+          description: the customer ID of the customer to be changed
+          schema: 
+            type: integer
+        - name: status
+          in: query
+          required: true
+          description: new customer status
+          schema: 
+            type: string
+            enum:
+              - Active
+              - Non-Active
+              - Lead                   
+      responses:
+        204:
+          description: changed customer json object is returned
+        404:
+          description: the requested customer does not exist
+    options:
+      summary: send a 200 to allow for browser CORS check
+      description: send a 200 to allow for browser CORS check
+      operationId: customers.cors
+      parameters:
+        - name: customerId 
+          in: query
+          required: true
+          description: the customer ID of the customer to be changed
+          schema: 
+            type: integer     
+          
+      responses:
+        200:
+          description: Always 200 to allow cors preflight check
+  /customers/{customerId}:
+    get:
+      summary: Get the customer by Id
+      description: Returns the customer for the ID
+      operationId: customers.get_customer_by_id
+      parameters:
+        - name: customerId 
+          in: path
+          required: true
+          description: the customerID for the customer to be retrieved
+          schema: 
+            type: integer
+      responses:
+        204:
+          description: Will return the full customer JSON object
+        404:
+          description: Will be returned when the customer does not exist
+          
+  /customers/getByFilter:
+    get:
+      summary: get customers by passed filters
+      operationId: customers.get_customer_by_filter
+      parameters:
+        - name: name
+          in: query 
+          description: part of the customer name
+          schema:
+            type: string
+        - name: id
+          in: query
+          description: the ID of the customer
+          schema:
+            type: integer
+        - name: contact
+          in: query
+          description: contact number of the customer
+          schema:
+            type: string
+        - name: createdTimestamp
+          in: query
+          description: the created timestamp of the customer
+          schema:
+            type: string
+      responses:
+        204:
+          description: the list of customers matching the filter
+  /customers/{customerId}/opportunities:
+    get:
+      summary: get opportuites for the customer
+      operationId: opportunities.get_opportunities
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: customerId
+          schema:
+            type: integer
+      responses:
+        204:
+          description: the list opportunities for the customer will be returned
+    post:
+      summary: Add new opportunity for the customer
+      operationId: opportunities.add_opportunities
+      requestBody:
+        description: New opportunity for the customer wil be added
+        content: 
+          application/json:
+            schema:
+              x-body-name: "opportunity"
+              $ref: '#/components/schemas/opportunity'
+        required: true
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          description: customerId
+          schema:
+            type: integer
+      responses:
+        204:
+          description: the added opportunity will be returned
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/opportunity'
+    options:
+      summary: to support CORS preflight check
+      operationId: opportunities.cors
+      responses:
+        200:
+          description: always sent to allow CORS support
+  /opportunities/{opportunityId}:      
+    put:
+      summary: Edit a given opportunity
+      operationId: opportunities.edit_opportunity
+      requestBody:
+        description: The opuurtuity for the customer will be edited
+        content: 
+          application/json:
+            schema:
+              $ref: '#/components/schemas/opportunity'
+              x-body-name: "opportunity"
+        required: true
+      parameters:
+        - name: opportunityId
+          in: path
+          required: true
+          description: Id of the opportunity to be modified
+          schema:
+            type: integer
+      responses:
+        204:
+          description: the added opportunity will be returned
+    options:
+      summary: to support CORS preflight check
+      operationId: opportunities.cors_v2
+      responses:
+        200:
+          description: always sent to allow CORS support
+          
+components:
+  schemas:
+    Customer:
+      type: object
+      properties:
+        id: 
+          type: integer
+          example: 1234
+        name:
+          type: string
+          example: "john doe"
+        contact:
+          type: string
+          example: "+9411279729"
+        status:
+          type: string
+          enum:
+            - Active
+            - Non-Active
+            - Lead
+        createdTimestamp:
+          type: string
+    opportunity:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1234
+        name:
+          type: string
+          example: "Sample opportunity"
+        status:
+          type: string
+          enum:
+            - New
+            - Closed-Won
+            - Closed-Lost
+        
+    
+    
+  
